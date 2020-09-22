@@ -1,12 +1,13 @@
 import {
-    CHANGE_LANGUAGE, PRINTER_SETTING
+    CHANGE_LANGUAGE, PRINTER_SETTING, PRINTER_TYPE
 } from '../types';
 
 const initialState = {
 
     Lang: 'en',
     RTL: false,
-    PrinterSize:'3INCH'
+    PrinterSize:'3INCH',
+    Address:''
 };
 const SettingsReducer = (state = initialState, action) => {
 
@@ -25,11 +26,19 @@ const SettingsReducer = (state = initialState, action) => {
             };
 
         case PRINTER_SETTING:
-
+ 
             return {
                 ...state,
-                PrinterSize: action.PrintType
+                Address:action.Address
             }
+
+
+            case PRINTER_TYPE:
+                return{
+                    ...state,
+                    PrinterSize: action.PrintType,
+
+                }
 
 
         // case SIGNOUT_REQUEST:

@@ -18,12 +18,14 @@ export const CardFunStyle = StyleSheet.create({
         backgroundColor: '#ecf0f1',
     },
     item: {
+        borderColor: '#cccccc',
+        borderWidth: 0.5,
+        borderRadius: 15,
         flexDirection: 'row',
         textAlign: "center",
         margin: PRODUCT_ITEM_OFFSET,
         overflow: 'visible',
-        borderRadius: 4,
-        //borderColor: 'grey',
+         //borderColor: 'grey',
         width: (SCREEN_WIDTH - PRODUCT_ITEM_MARGIN) / 2 -
             PRODUCT_ITEM_MARGIN,
         padding: 10,
@@ -178,7 +180,7 @@ export const ItemsGroupStyle = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#f2f2f2",
-        alignItems: "center",
+         alignItems: "center",
     },
     imgView: {
         flex: 1,
@@ -195,15 +197,16 @@ export const ItemsGroupStyle = StyleSheet.create({
         padding: PRODUCT_ITEM_OFFSET
     },
     InputSearch: {
+        backgroundColor:'white',
         textAlign: rtlView().textAlign,
         ...Platform.select({
             ios: {
                
-                paddingVertical: 14
+              //  paddingVertical: 14
 
             },
             android: {
-                paddingVertical: 11
+                paddingVertical: 1
             },
         }),
     }
@@ -242,8 +245,10 @@ export const BasketCardstyles = StyleSheet.create({
     item: {
         flex: 1,
         direction: I18nManager.isRTL ? 'rtl' : 'ltr',
-        borderRadius: 3,
-        borderColor: 'grey',
+      //  borderColor: '#cccccc',
+        borderWidth: 0.5,
+        borderRadius: 15,
+        
         flexDirection: 'row',
         backgroundColor: 'white',
         justifyContent: 'space-between',
@@ -430,7 +435,7 @@ export const  ComponentStyles = StyleSheet.create({
         textAlign: 'left'
     },
     topLinks: {
-        height: 150,
+        height: 120,
         backgroundColor: '#b40000',
         paddingHorizontal: 20
 
@@ -445,7 +450,7 @@ export const  ComponentStyles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingTop: 25,
+    
         borderBottomWidth: 1,
         borderBottomColor: '#777777'
     },

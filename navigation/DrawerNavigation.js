@@ -9,59 +9,38 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import ContentComponent from '../navigation/ConetentContainer'
 import ClientsPage from '../ClientsFolder/ClientsPage'
-// import MapsPage from '../LocationsComponants/MapsPage'
+ import MapsPage from '../LocationsComponants/MapsPage'
 // import LocationOnMaps from '../LocationsComponants/LocationOnMaps'
 // import LocationPage from '../LocationsComponants/LocationsPage'
 import CreateNewClient from '../ClientsFolder/CreateNewClient'
-// import ItemGroupsPage from '../SellingItemsAndCartFolder/ItemGroupsPage'
-// import BasketCart from '../SellingItemsAndCartFolder/BasketCart'
+import ItemGroupsPage from '../SellingItemsAndCartFolder/ItemGroupsPage'
+import BasketCart from '../SellingItemsAndCartFolder/BasketCart'
 
 import { rtlView, rtlView2 } from '../constants/Layout';
 
-// import OrderInvoice from '../OrdersAndInvoices/OrderInvoice'
+import OrderInvoice from '../OrdersAndInvoices/OrderInvoice'
 
 
 import String from '../translation/Translate';
-// import UpdateClient from '../ClientsFolder/UpdateClient';
-//  import OperationsList from '../OrdersAndInvoices/OperationsList';
-// import InvoiceDetails from '../OrdersAndInvoices/Invoices/InvoiceDetails';
+import UpdateClient from '../ClientsFolder/UpdateClient';
+import OperationsList from '../OrdersAndInvoices/OperationsList';
+import InvoiceDetails from '../OrdersAndInvoices/Invoices/InvoiceDetails';
 import TestList from './TestList';
 import TestListS from './TestListS';
+import { requestPermission } from '../constants/LocationData';
 
 
 const WIDTH = Dimensions.get('window').width;
 
+requestPermission()
 
-
-// const MapsPageStack = createStackNavigator({
-//     MapsPage: {
-//         screen: MapsPage,
-//         navigationOptions: ({ navigation }) => {
-
-//             return {
-//                 headerTitle: String.Maps,
-//                 headerTitleStyle: { color: 'white', textAlign: 'center' },
-//                 headerStyle: { backgroundColor: '#b40000' },
-
-//                 headerLeft: (<Ionicons
-//                     style={{ color: "#ffffff", paddingRight: 15, paddingLeft: 15 }}
-//                     onPress={() => navigation.openDrawer()}
-//                     name="md-menu"
-//                     size={30} />),
-//             };
-
-
-//         }
-//     }
-// })
-
-const ClientStack = createStackNavigator({
-    ClientsPage: {
-        screen: ClientsPage,
+const MapsPageStack = createStackNavigator({
+    MapsPage: {
+        screen: MapsPage,
         navigationOptions: ({ navigation }) => {
 
             return {
-                headerTitle: String.Parties,
+                headerTitle: String.Maps,
                 headerTitleStyle: { color: 'white', textAlign: 'center' },
                 headerStyle: { backgroundColor: '#b40000' },
 
@@ -70,45 +49,71 @@ const ClientStack = createStackNavigator({
                     onPress={() => navigation.openDrawer()}
                     name="md-menu"
                     size={30} />),
-                // headerRight: (<Ionicons
-                //     style={{ color: "#ffffff", paddingRight: 15 }}
-                //     onPress={() => navigation.navigate('NewClient')}
-                //     name="md-add-circle"
-                //     size={30}
-                // />)
+            };
+
+
+        }
+    }
+})
+
+const ClientStack = createStackNavigator({
+    ClientsPage: {
+        screen: ClientsPage,
+        navigationOptions: ({ navigation }) => {
+
+            return {
+                header: null,
+
+                AppSwitchNavigator: true,
+
+                // headerTitle: String.Parties,
+                // headerTitleStyle: { color: 'white', textAlign: 'center' },
+                // headerStyle: { backgroundColor: '#b40000',paddingTop:50},
+
+                // headerLeft: (<Ionicons
+                //     style={{ color: "#ffffff", paddingRight: 15, paddingLeft: 15 }}
+                //     onPress={() => navigation.openDrawer()}
+                //     name="md-menu"
+                //     size={30} />),
+                // // headerRight: (<Ionicons
+                // //     style={{ color: "#ffffff", paddingRight: 15 }}
+                // //     onPress={() => navigation.navigate('NewClient')}
+                // //     name="md-add-circle"
+                // //     size={30}
+                // // />)
             };
 
         }
 
     },
 
-    // Items: {
-    //     screen: ItemGroupsPage,
-    //     navigationOptions: ({ navigation }) => {
+    Items: {
+        screen: ItemGroupsPage,
+        navigationOptions: ({ navigation }) => {
 
-    //         return {
-    //             header: null,
+            return {
+                header: null,
 
-    //             AppSwitchNavigator: true,
+                AppSwitchNavigator: true,
 
-    //         };
-
-
-    //     },
-    // }, Basket: {
-    //     screen: BasketCart,
-    //     navigationOptions: ({ navigation }) => {
-
-    //         return {
-    //             header: null,
-
-    //             AppSwitchNavigator: true,
-
-    //         };
+            };
 
 
-    //     },
-    // }
+        },
+    }, Basket: {
+        screen: BasketCart,
+        navigationOptions: ({ navigation }) => {
+
+            return {
+                header: null,
+
+                AppSwitchNavigator: true,
+
+            };
+
+
+        },
+    }
 
     // , LocationOnMaps: {
     //     screen: LocationOnMaps,
@@ -131,43 +136,42 @@ const ClientStack = createStackNavigator({
 
     //     }
     // },
+,
+    UpdateClient: {
+        screen: UpdateClient,
+        navigationOptions: ({ navigation }) => {
+            return {
+                headerTitle: String.PartyInfo,
+                headerTitleStyle: { color: 'white' },
+                headerStyle: { backgroundColor: '#b40000' },
+
+                headerLeft: (<Ionicons color='white'
+                    style={{ paddingLeft: 15, paddingRight: 15 }}
+                    onPress={() => navigation.goBack()}
+                    name={rtlView().back}
+                    size={25}
+
+                />)
+            }
+        }
+    }
+    ,
+
+    Invoices: {
+        screen: OrderInvoice,
+        navigationOptions: ({ navigation }) => {
+            return {
+                header: null,
+
+                AppSwitchNavigator: true,
+
+            };
 
 
-    // UpdateClient: {
-    //     screen: UpdateClient,
-    //     navigationOptions: ({ navigation }) => {
-    //         return {
-    //             headerTitle: String.PartyInfo,
-    //             headerTitleStyle: { color: 'white' },
-    //             headerStyle: { backgroundColor: '#b40000' },
-
-    //             headerLeft: (<Ionicons color='white'
-    //                 style={{ paddingLeft: 15, paddingRight: 15 }}
-    //                 onPress={() => navigation.goBack()}
-    //                 name={rtlView().back}
-    //                 size={25}
-
-    //             />)
-    //         }
-    //     }
-    // },
+        },
 
 
-    // Invoices: {
-    //     screen: OrderInvoice,
-    //     navigationOptions: ({ navigation }) => {
-    //         return {
-    //             header: null,
-
-    //             AppSwitchNavigator: true,
-
-    //         };
-
-
-    //     },
-
-
-    // }
+    }
 
 
 
@@ -236,55 +240,61 @@ ClientStack.navigationOptions = ({ navigation }) => {
 
 
 
-// const InvoicesStack = createStackNavigator({
-//     OperationsList: {
-//         screen: OperationsList,
-//         navigationOptions: ({ navigation }) => {
+const InvoicesStack = createStackNavigator({
+    OperationsList: {
+        screen: OperationsList,
+        navigationOptions: ({ navigation }) => {
 
-//             return {
-//                 headerTitle: String.Invoices,
-//                 headerTitleStyle: { color: 'white' },
-//                 headerStyle: { backgroundColor: '#b40000' },
+            // return {
+            //     headerTitle: String.Invoices,
+            //     headerTitleStyle: { color: 'white' },
+            //     headerStyle: { backgroundColor: '#b40000' },
 
-//                 headerLeft: (<Ionicons
-//                     style={{ color: "#ffffff", paddingLeft: 15, paddingRight: 15 }}
-//                     onPress={() => navigation.openDrawer()}
-//                     name="md-menu"
-//                     size={25} />),
-//             };
+            //     headerLeft: (<Ionicons
+            //         style={{ color: "#ffffff", paddingLeft: 15, paddingRight: 15 }}
+            //         onPress={() => navigation.openDrawer()}
+            //         name="md-menu"
+            //         size={25} />),
+            // };
+            return {
+                header: null,
 
+                AppSwitchNavigator: true,
 
-//         }
-//     },
-//     InvoiceDetails: {
-//         screen: InvoiceDetails,
-//         navigationOptions: ({ navigation }) => {
-
-//             return {
-//                 header: null,
-
-//                 AppSwitchNavigator: true,
-
-//             };
+            };
 
 
-//         },
-//     },
-//     OrderDetails: {
-//         screen: ItemGroupsPage,
-//         navigationOptions: ({ navigation }) => {
+        }
+    },
+    InvoiceDetails: {
+        screen: InvoiceDetails,
+        navigationOptions: ({ navigation }) => {
 
-//             return {
-//                 header: null,
+            return {
+                header: null,
 
-//                 AppSwitchNavigator: true,
+                AppSwitchNavigator: true,
 
-//             };
+            };
 
 
-//         }
-//     },
-// })
+        },
+    },
+    OrderDetails: {
+        screen: ItemGroupsPage,
+        navigationOptions: ({ navigation }) => {
+
+            return {
+                header: null,
+
+                AppSwitchNavigator: true,
+
+            };
+
+
+        }
+    },
+})
 
 
 
@@ -381,9 +391,31 @@ const BottonTabNavigator2 = createBottomTabNavigator({
 
 const BottonTabNavigator = createBottomTabNavigator(
     {
-        Client: ClientStack,
-         Maps: TestListS,
-         KK:TestList,
+        Client: {
+            screen: ClientStack,
+            navigationOptions: ({ navigation, navigationOptions }) => ({
+
+                tabBarLabel: String.Parties,
+
+
+            })
+        }, 
+        Maps: {
+            screen: MapsPageStack,
+            navigationOptions: ({ navigation, navigationOptions }) => ({
+                tabBarLabel: String.Maps,
+
+
+            })
+        },
+        // KK: {
+        //     screen: TestList,
+        //     navigationOptions: ({ navigation, navigationOptions }) => ({
+        //         tabBarLabel: String.Parties,
+
+
+        //     })
+        // },
     },
     {
         defaultNavigationOptions: ({ navigation }) => ({
@@ -392,10 +424,10 @@ const BottonTabNavigator = createBottomTabNavigator(
 
                 let iconName;
                 if (routeName === 'Client') {
-                   // iconName = `ios-information-circle${focused ? '' : '-outline'}`;
+                    // iconName = `ios-information-circle${focused ? '' : '-outline'}`;
                     // Sometimes we want to add badges to some icons.
                     // You can check the implementation below.
-                    iconName=Platform.OS === "ios" ? "ios-contacts" : "md-contacts"
+                    iconName = Platform.OS === "ios" ? "ios-contacts" : "md-contacts"
 
                 } else if (routeName === 'Maps') {
                     iconName = "md-map";
@@ -406,7 +438,7 @@ const BottonTabNavigator = createBottomTabNavigator(
             },
         }),
         tabBarOptions: {
-          //  activeTintColor: 'tomato',
+            //  activeTintColor: 'tomato',
             inactiveTintColor: 'gray',
             activeTintColor: '#b40000',
             tabStyle: { paddingTop: 5 },
@@ -436,13 +468,13 @@ const DrawerNavigator = createDrawerNavigator(
                 drawerIcon: () => <Ionicons name='md-home' size={32} />
             })
         },
-        // OperationsList: {
-        //     screen: InvoicesStack,
-        //     navigationOptions: ({ navigation }) => ({
-        //         drawerLabel: String.Invoices,
-        //         drawerIcon: () => <Icon name='file-document' size={32} />
-        //     })
-        // },
+        OperationsList: {
+            screen: InvoicesStack,
+            navigationOptions: ({ navigation }) => ({
+                drawerLabel: String.Invoices,
+                drawerIcon: () => <Icon name='file-document' size={32} />
+            })
+        },
         // Settings: {
         //     screen: Settings,
         //     navigationOptions: ({ navigation }) => ({
@@ -511,4 +543,5 @@ const DrawerNavigator = createDrawerNavigator(
 
 
 
-export defaul
+export default (DrawerNavigator);
+

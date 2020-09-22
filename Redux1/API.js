@@ -2,6 +2,7 @@ import * as axios from "axios";
 import { GenericExecService, LoginURL } from "./Url";
 import constantData from "../constants/constantsData";
 import { DateDay, DateTimeCustom } from "../constants/DateTime";
+import { NetInfo } from "@react-native-community/netinfo";
 
 
 export const GetLookUps = async (token, userHeaderInfo) => {
@@ -90,7 +91,7 @@ export const GetProfilePic = async (token) => {
 
 
 
-export const GetParties = async (token, userHeaderInfo) => {
+export const GetParties= async (token, userHeaderInfo) => {
 
   const uuidv4 = require('uuid/v4')
   const uniqueInsuranceId = uuidv4()
@@ -134,9 +135,9 @@ export const GetParties = async (token, userHeaderInfo) => {
         body: JSON.stringify(data)
       })
 
-     // console.log('Party', ret)
+    
     var obj = await ret.json();
-    //  console.log('Party', obj)
+    // console.log('Party', obj)
 
     return obj
   } catch (error) {
@@ -145,6 +146,13 @@ export const GetParties = async (token, userHeaderInfo) => {
   }
 }
 
+
+
+
+
+
+
+ 
 
 
 
@@ -179,7 +187,7 @@ export const GetItemsGroups = async (token, userHeaderInfo) => {
     "jReq": JSON.stringify(headData)
 
   }
-  //console.log('Respons', data)
+ // console.log('Respons', data)
 
   var ret = await fetch(GenericExecService,
     {
@@ -197,13 +205,8 @@ export const GetItemsGroups = async (token, userHeaderInfo) => {
   var obj = await ret.json();
 
 
-  //  console.log('Respons', obj)
-
-
-  //  obj2 = JSON.parse(obj.result)
-  // console.log('qqq', obj2[0])
-  //console.log('ItemsGroups', obj2[0][0].Packs)
-  //console.log('ItemsGroups', obj2[0].Items[0])
+  //console.log('Respons', obj)
+ 
   return obj
 }
 

@@ -9,7 +9,9 @@ import {
     GET_INVOICE_NUMBER,
     OTHER_ORDER_SELECTION,
     SET_ORDERS_API,
-    ADD_TO_ORDER
+    ADD_TO_ORDER,
+    LOADING_PENDDING_INOICES,
+    FINISHED_PENDDING_INOICES
 } from '../types';
 
 const initialState = {
@@ -21,7 +23,7 @@ const initialState = {
     CreationLocation: '',
     InvoiceNumber: 0,
     PriceWords: '',
-
+    spinnerVisible: false,
     OrderSelectedItems: [],
     OrdermainItems: [],
     BackUpOrderitems: [],
@@ -35,6 +37,8 @@ const InvoicesReducer = (state = initialState, action) => {
     switch (action.type) {
 
 
+
+
         case SET_ORDERS_API:
             return {
                 ...state,
@@ -46,7 +50,7 @@ const InvoicesReducer = (state = initialState, action) => {
             return {
                 ...state,
                 CreationDate: action.Date,
-                CreationLocation: action.Location.latitude + ',' + action.Location.longitude,
+                CreationLocation: action.Location,
 
             }
 
@@ -140,8 +144,7 @@ const InvoicesReducer = (state = initialState, action) => {
             return {
                 ...state,
                 hasErrors: false,
-                spinnerVisible: false,
-
+ 
                 OrderSelectedItems: state.OrderSelectedItems.concat(JSON.parse(JSON.stringify(action.ItemsList))),
                 // OrderallItems: action.ItemsList,
                 BackUpOrderitems: state.OrderSelectedItems.concat(JSON.parse(JSON.stringify(action.ItemsList))),
@@ -156,6 +159,32 @@ const InvoicesReducer = (state = initialState, action) => {
                 SectorID: action.SectorID,
                 OrderSelectedItems: JSON.parse(JSON.stringify(state.BackUpOrderitems)),
             }
+
+
+
+
+
+
+        case LOADING_PENDDING_INOICES:
+            {
+                console.log("start")
+
+            }
+            return {
+                ...state,
+                spinnerVisible: true
+            }
+
+
+        case FINISHED_PENDDING_INOICES:
+            {
+                console.log("Finished")
+            }
+            return {
+                ...state,
+                spinnerVisible: false
+            }
+
 
 
         // case ORDER_GET_ALL_ITEMS:

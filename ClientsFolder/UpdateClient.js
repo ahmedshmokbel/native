@@ -1,26 +1,19 @@
 import React, { Component } from 'react';
-import { Facebook, Linking } from 'expo';
-import Dimensions from 'Dimensions';
 import {
-    Text, Button, TouchableOpacity, Animated,
-    Easing, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, View, Image, StyleSheet, ImageBackground, I18nManager, Platform
+    Animated,View,
+    StyleSheet, I18nManager, ActivityIndicator,
 } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
-import Navigation from '../navigation/NavigationService'
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import IconPass from 'react-native-vector-icons/MaterialCommunityIcons';
- 
-//import MapView, { ProviderPropType, Marker } from 'react-native-maps';
+
+import MapView, { ProviderPropType, Marker } from 'react-native-maps';
 import { connect } from 'react-redux'
-import { LoginPress, LookUpsAction } from '../Redux1/actions/LoginActions';
-import * as axios from "axios";
-import { rtlView } from '../constants/Layout';
+
 import { UpdatePartyAction } from '../Redux1/actions/PartiesActions';
-import { ItemsGroupStyle } from '../constants/AppStyles';
-import Translate from '../translation/Translate';
+
 //  import LocationOnMaps from '../LocationsComponants/LocationOnMaps';
 import { Container, Header, Content, Form, Item, Input, Label } from 'native-base';
 import String from '../translation/Translate'
+import { Button } from 'react-native-elements';
+import { round } from 'react-native-reanimated';
 
 
 class UpdateClient extends React.Component {
@@ -32,14 +25,11 @@ class UpdateClient extends React.Component {
         var party = props.navigation.state.params.Party
 
 
-      //  console.log("payload", party.DisplayName)
+        //  console.log("payload", party.DisplayName)
 
         this.buttonAnimated = new Animated.Value(0);
         this.growAnimated = new Animated.Value(0);
 
-
-        let latitude = 0.0043 //Number(lat)
-        let longitude = 0.0034 //Number(lng)
 
         this.state = {
             isLoading: false,
@@ -60,7 +50,10 @@ class UpdateClient extends React.Component {
         const { phone, fax, email } = this.state;
         var CODE = this.props.navigation.state.params.Party.PartyCode
 
-        this.props.dispatch(UpdatePartyAction(this.props.Token, this.props.userHeaderInfo, phone, fax, email, CODE,this.props.navigation));
+        this.props.dispatch(UpdatePartyAction(this.props.Token, this.props.userHeaderInfo, phone, fax, email, CODE, this.props.navigation))
+        .then(res=>{
+            this.setState({ isLoading: false })
+        })
         // const latitude = "31.176737";
         // const longitude = "29.895345";
         // const label = "d";
@@ -79,8 +72,9 @@ class UpdateClient extends React.Component {
 
     render() {
         const { PartyName, fax, email } = this.state;
-
-        if (this.props.navigation.state.params.Party.ImageGPSInfo!="") {
+        var latitude
+        var longitude
+        if (this.props.navigation.state.params.Party.ImageGPSInfo != "") {
 
 
             var lat = this.props.navigation.state.params.Party.ImageGPSInfo.split(',')[0].trim();
@@ -118,17 +112,23 @@ class UpdateClient extends React.Component {
                     </Item>
                 </Form>
 
+                {this.state.isLoading == true &&
+                    <View >
+                        <ActivityIndicator size="large" color="#b40000" />
+                    </View>
 
-                <Button
+                }
+                <Button buttonStyle={{ marginVertical: 20, backgroundColor: '#b40000', borderRadius:10}}
                     onPress={() => {
+                        this.setState({ isLoading: true })
                         this.handleSave();
                     }}
 
-                    color="#b40000"
+
                     title={String.UpdateInfo}
                 />
 
-{/* 
+
                 <MapView provider={MapView.PROVIDER_GOOGLE}
                     showsUserLocation
                     zoomControlEnabled={true}
@@ -172,7 +172,7 @@ class UpdateClient extends React.Component {
                     />
 
 
-                </MapView > */}
+                </MapView >
             </Container>
 
 

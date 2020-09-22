@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { MenuProvider } from 'react-native-popup-menu';
+import { MenuProvider, MenuContext } from 'react-native-popup-menu';
 import { Provider } from 'react-redux';
 
 
@@ -17,6 +17,7 @@ import store, { persistor } from './Redux1/store'
 import NavigationService from './navigation/NavigationService';
 //import * as Font from 'expo-font';
 import AppNavigator from './navigation/AppNavigator';
+import SplashScreen from 'react-native-splash-screen'
 
 import {
   Header,
@@ -29,32 +30,36 @@ import {
 
 
 export default class App extends React.PureComponent {
+ 
 
-
-
+  componentDidMount() {
+    setTimeout(() => SplashScreen.hide() , 1000);
+}
 
   render() {
-
+    // SplashScreen.hide();
     return (
- 
-        <Provider store={store}>
+      // <MenuProvider >
 
-          <PersistGate loading={null} persistor={persistor}>
+      <Provider store={store}>
 
-            {/* <MenuProvider > */}
-              <AppNavigator ref={navigatorRef => {
-                NavigationService.setTopLevelNavigator(navigatorRef);
-              }} />
-            {/* </MenuProvider> */}
-          </PersistGate>
+        <PersistGate loading={null} persistor={persistor}>
 
-        </Provider>
-     );
+          <MenuProvider >
+            <AppNavigator ref={navigatorRef => {
+              NavigationService.setTopLevelNavigator(navigatorRef)
+            }} />
+          </MenuProvider>
+        </PersistGate>
+
+      </Provider>
+      /* </MenuProvider> */
+    );
   };
 }
 
 const styles = StyleSheet.create({
-  
+
   engine: {
     position: 'absolute',
     right: 0,

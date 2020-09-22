@@ -114,11 +114,9 @@ const ItemGroupsReducer = (state = initialState, action) => {
             }
             return {
                 ...state,
-                //    Groups: action.MainGroup,
-                //  GroupsMain: action.MainGroup,
-                //     SubGroup: SubGroup,
-                items: action.ItemsList,
-                allItems: action.ItemsList,
+
+                items: action.ItemsList,  /// action.ItemsList is the items for specific party 
+                //     allItems: action.ItemsList, //used for search !
                 SectorID: action.SectorID
 
                 //BackUpItems: JSON.parse(JSON.stringify(action.ItemsList))
@@ -127,17 +125,6 @@ const ItemGroupsReducer = (state = initialState, action) => {
 
 
 
-        // case SEARCH_ITEM_CODE:
-        //     {
-        //         state.searchItem
-        //         state.searchItem = action.search
-        //         //  console.log('payload', state.filtered)
-        //         //    state.items = vv
-        //         state.items = state.searchItem
-        //     }
-        //     return {
-        //         ...state
-        //     }
 
 
 
@@ -187,8 +174,7 @@ const ItemGroupsReducer = (state = initialState, action) => {
 
                         SelectedItem.SoldQuantity += (SelectedItem.Packs[StepIndex].ConvRatio)
                         state.ReduxStock = SelectedItem.RemainStock = SelectedItem.Stock - SelectedItem.SoldQuantity
-
-                    //    console.log('Stock', SelectedItem.RemainStock)
+                    
 
                         SelectedItem.Packs[StepIndex].wsd_percent = (SelectedItem.wsd_percent)
                         SelectedItem.Packs[StepIndex].cashd_percent = (SelectedItem.cashd_percent)
@@ -287,14 +273,13 @@ const ItemGroupsReducer = (state = initialState, action) => {
 
 
                 // console.log('item index', ItemIndex)
-                if (stepperItemCount > 0) {
+                if (stepperItemCount > 0) {  //// once the the counter >0  i can decrement 
 
                     SelectedItem.SoldQuantity -= (SelectedItem.Packs[StepIndex].ConvRatio)
                     stepperItemCount = SelectedItem.Packs[StepIndex].SelectedQuantity -= 1
                     state.ReduxStock = SelectedItem.RemainStock = (SelectedItem.Stock) - (SelectedItem.SoldQuantity)
 
-
-
+                 
                     SelectedItem.Packs[StepIndex].wsd_percent = (SelectedItem.wsd_percent)
                     SelectedItem.Packs[StepIndex].cashd_percent = (SelectedItem.cashd_percent)
                     SelectedItem.Packs[StepIndex].promod_percent = (SelectedItem.promod_percent)
@@ -351,9 +336,9 @@ const ItemGroupsReducer = (state = initialState, action) => {
 
 
 
-                    // if (StepIndex === 0) {
+                    // when dectement any couter has value and the remain = the stock means non selected so remove from cart
                     if (SelectedItem.RemainStock == SelectedItem.Stock) {
-
+ 
                         SelectedItem.isAddToCart = true
                         SelectedItem.isStepperView = false
                         SelectedItem.TotalPrice = 0.0
@@ -380,11 +365,16 @@ const ItemGroupsReducer = (state = initialState, action) => {
                             SelectedItem.Packs[StepIndex].netprice = 0.0
 
                         }
+
                     }
                     //   }
+
+
+
                 }
-                else {
+                else { // when non counter packs selected all cout = 0 zhide 
                     if (stepperItemCount == 0 && SelectedItem.SoldQuantity == 0) {
+ 
                         SelectedItem.isAddToCart = true
                         SelectedItem.isStepperView = false
                     }
@@ -445,8 +435,6 @@ const ItemGroupsReducer = (state = initialState, action) => {
 
                 });
 
-                // SelectedItem.TotalDiscount = parseFloat(SelectedItem.TotalDiscount - OtherDis).toFixed(2)
-                // SelectedItem.NetPrice = parseFloat(SelectedItem.NetPrice - OtherDis).toFixed(2)
 
 
                 SelectedItem.TotalPrice = parseFloat(SelectedItem.TotalPrice).toFixed(2)
@@ -461,45 +449,6 @@ const ItemGroupsReducer = (state = initialState, action) => {
                 ...state
             }
 
-
-
-        // case FILTER_BY_GROUP:    // filtering the items based on its group
-        //     {
-        //         //         var editedState = [...state.items]
-
-        //         //         var filterCode = action.Code
-        //         // //console.log('reducer', filterCode)
-
-        //         //         state.filtered = [];
-        //         //         vv= editedState.filter(editedState => (editedState.Code).startsWith(filterCode))
-        //         //    state.items = action.payload
-        //         state.filtered
-        //         state.filtered = action.payload
-        //         //  console.log('payload', state.filtered)
-        //         //    state.items = vv
-        //         state.items = state.filtered
-        //     }
-        //     return {
-        //         ...state
-        //     }
-
-
-
-
-        // case VIEW_ALL_ITEMS:
-
-        //     {
-        //         //   state.filtered = [];
-        //         var editedState = [...state.allItems]
-        //         //  // console.log('View', state.items)
-
-
-        //         state.items = editedState
-
-        //     }
-        //     return {
-        //         ...state
-        //     }
 
 
 
@@ -560,7 +509,7 @@ const ItemGroupsReducer = (state = initialState, action) => {
             {
                 //   var otherPartyItems = [...state.BackUpItems]
                 state.mainItems = JSON.parse(JSON.stringify(state.BackUpItems))
-
+               
             }
             return {
                 ...state,
@@ -570,15 +519,29 @@ const ItemGroupsReducer = (state = initialState, action) => {
 
 
 
-        case ADD_INVOICE:// to rest all the selection after printing the invoice
+        case ADD_INVOICE:// to rest all the selection after printing the invoice and update the Stock localy 
 
+            {
+
+                var editBackup = [...JSON.parse(JSON.stringify(state.BackUpItems))]
+
+                editBackup.forEach(item => {
+                    var InvoiceItems = action.payload[0].Items.find(x => x.Id == item.Id)
+                    if (InvoiceItems !== undefined) {
+
+                        item.Stock = InvoiceItems.RemainStock
+                        item.RemainStock = InvoiceItems.RemainStock
+                    }
+
+                });
+
+                state.mainItems = JSON.parse(JSON.stringify(editBackup))
+                state.BackUpItems = JSON.parse(JSON.stringify(editBackup))
+                state.PartyID = 0
+            }
             return {
                 ...state,
-                //    Groups: action.MainGroup,
-                //  GroupsMain: action.MainGroup,
-                //     SubGroup: SubGroup,
-                items: action.ItemsList,
-                allItems: action.ItemsList,
+
                 PartyID: 0
             }
 

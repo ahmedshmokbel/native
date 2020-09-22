@@ -10,8 +10,8 @@ import { AsyncStorage } from 'react-native';
 import LoginReducer from "./reducers/LoginReducer";
 import PartiesRedusers from "./reducers/PartiesReducer";
 import SettingsReducer from "./reducers/SettingsReducer";
-// import ItemGroupsReducer from "./reducers/ItemsGroupsReducer";
-// import InvoicesReducer from "./reducers/InvoicesReducer";
+import ItemGroupsReducer from "./reducers/ItemsGroupsReducer";
+import InvoicesReducer from "./reducers/InvoicesReducer";
 
 export const persistConfig = {
   key: "persist",
@@ -30,11 +30,11 @@ export const {
 const rootReducer = combineReducers({
   login: LoginReducer,
 
-  // itemGroups: ItemGroupsReducer,
+  itemGroups: ItemGroupsReducer,
 
   parties: PartiesRedusers,
   settings: SettingsReducer,
-  // invoices: InvoicesReducer
+ invoices: InvoicesReducer
 
 })
 

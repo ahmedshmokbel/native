@@ -1,6 +1,6 @@
 import React from 'react';
-import { Platform, StyleSheet, Alert, Text, TextInput,Image, TouchableOpacity, View } from 'react-native';
-import { Avatar, Button, Icon,  } from 'react-native-elements';
+import { Platform, StyleSheet, Alert, Text, TouchableOpacity, Image, View, TextBase } from 'react-native';
+import { Avatar, Button, Icon, } from 'react-native-elements';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // import * as ImagePicker from 'expo-image-picker';
 // import * as Permissions from 'expo-permissions';
@@ -16,22 +16,23 @@ import { PartyUrl } from '../Redux1/Url';
 // import { Image } from 'react-native-expo-image-cache';
 import String from '../translation/Translate'
 import { rtlView } from '../constants/Layout';
+import autoMergeLevel1 from 'redux-persist/es/stateReconciler/autoMergeLevel1';
 
 
- // import { Avatar } from ' react-native-elements'
+// import { Avatar } from ' react-native-elements'
 
 
 //const BadgedIcon = withBadge(10)(Icon)
 class ClientCell extends React.PureComponent {
 
-   // const preview = { uri: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" };
-    //  console.log(this.props.ImageUrl);
+    // const preview = { uri: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" };
     render() {
         const uri = PartyUrl + this.props.ImageUrl
+            // console.log(this.props.GISName );
 
         return (
+            <TouchableOpacity underlayColor='rgba(73,182,77,0.9)' onPress={() => this.props.viewItemsGroup(this.props.PartyCode, this.props.BPSectorId, this.props.DisplayName)}>
 
-            <TouchableOpacity onPress={() => this.props.viewItemsGroup(this.props.PartyCode, this.props.BPSectorId,this.props.DisplayName)}>
 
                 <View style={styles.topLinks}>
                     <View style={styles.container}>
@@ -52,10 +53,10 @@ class ClientCell extends React.PureComponent {
                                         :
                                         <View style={{ flexDirection: 'column', alignItems: "flex-end", position: 'relative' }}>
                                             <Image style={{
-                                                height: 60,
-                                                width: 60,
+                                                height: 62,
+                                                width: 62,
                                                 borderRadius: 30,
-                                            }}  {...{ uri }} />
+                                            }} source={{ uri: PartyUrl + this.props.ImageUrl }} />
                                             <View style={{ top: 35, borderRadius: 20, shadowOpacity: 0.3, backgroundColor: '#97978D', position: 'absolute', justifyContent: "center", alignItems: "center", width: 25, height: 25 }}>
                                                 <Icon name='mode-edit' size={20} iconStyle={{ textAlign: 'center', color: 'white' }} />
                                             </View>
@@ -66,6 +67,7 @@ class ClientCell extends React.PureComponent {
 
                             </View>
                         </TouchableOpacity>
+
 
                         <View style={styles.textContainer} >
 
@@ -81,21 +83,21 @@ class ClientCell extends React.PureComponent {
                                 <Text style={styles.nameType}>{getLocalizedJsonName(this.props.TypeName)}</Text>
                             </View>
 
-                            <View style={styles.profileText}>
+                            {this.props.GISName != null || this.props.GISName != "" &&
+                                <View style={styles.profileText}>
 
-                                <Text style={styles.name} >{getLocalizedJsonName(this.props.GISName)}</Text>
-                            </View>
-
+                                    <Text style={styles.name} >{getLocalizedJsonName(this.props.GISName)}</Text>
+                                </View>
+                            }
                         </View>
 
 
-
-
                     </View>
+
                     <Menu>
 
                         <MenuTrigger style={styles.trigger}>
-                            <Ionicons color="#b40000" size={35} name='md-more' />
+                            <Ionicons color="#b40000" size={37} name='md-more' />
                         </MenuTrigger>
 
                         <MenuOptions>
@@ -104,18 +106,16 @@ class ClientCell extends React.PureComponent {
                             >
                                 <Text style={[rtlView()], { fontSize: 17, }}>{String.Maps}</Text>
                             </MenuOption> */}
-                            <MenuOption onSelect={() => this.props.navigation.navigate('UpdateClient', { Party: this.props })} >
+                            <MenuOption style={{ padding: 20, }} onSelect={() => this.props.navigation.navigate('UpdateClient', { Party: this.props })} >
                                 <Text style={{ fontSize: 17 }}>{String.ViewInfo}</Text>
                             </MenuOption>
-                            {/* <MenuOption onSelect={() => alert(`Delete`)} >
-                            <Text style={{ color: 'red' }}>Delete</Text>
-                        </MenuOption>
-                        <MenuOption onSelect={() => alert(`Not called`)} disabled={true} text='Disabled' /> */}
+
                         </MenuOptions>
                     </Menu>
                 </View>
-
             </TouchableOpacity>
+
+
         );
     }
 }
@@ -150,6 +150,8 @@ const styles = StyleSheet.create({
     },
     container: {
         flexDirection: 'row',
+        //  backgroundColor: 'blue',
+        width: '90%'
 
 
     },
@@ -160,8 +162,8 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     img: {
-        height: 60,
-        width: 60,
+        height: 62,
+        width: 62,
         borderRadius: 50,
 
     },
@@ -171,10 +173,11 @@ const styles = StyleSheet.create({
     textContainer: {
         flexDirection: 'column',
         paddingLeft: '3%',
-
+        //    backgroundColor: 'red',
         textAlign: "right",
         justifyContent: 'flex-start',
         alignItems: 'flex-start',
+        width: '100%'
 
     },
     profileText: {
@@ -182,8 +185,10 @@ const styles = StyleSheet.create({
 
     },
     profileText2: {
-
+        flex: 1,
         flexDirection: 'row',
+        width: "80%",
+        flexWrap: "wrap",
 
 
     },
@@ -198,8 +203,10 @@ const styles = StyleSheet.create({
         fontSize: 15,
         paddingBottom: 2,
         paddingRight: 5,
-        //color: '#b40000',
+
+        color: '#b40000',
         textTransform: 'capitalize',
+
     },
     phone: {
         color: '#6a6a6a',

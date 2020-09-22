@@ -3,21 +3,23 @@ import { StyleSheet, Alert, Text, TouchableOpacity, View, FlatList, Image, Activ
 
 import { SearchBar, } from 'react-native-elements';
 
-// import * as ImagePicker from 'expo-image-picker';
-// import * as Permissions from 'expo-permissions';
 import ClientCell from '../ClientsFolder/ClientCell';
+import ImagePicker from 'react-native-image-picker';
 
 import { connect } from 'react-redux'
-import { GetPartiesAction, UpdatePartyImageAction } from '../Redux1/actions/PartiesActions';
+import { GetPartiesAction, UpdatePartyImageAction, ViewParties } from '../Redux1/actions/PartiesActions';
 import { rtlView } from '../constants/Layout';
 import { getLocalizedJsonName, getLocalizedJsonInvoice } from '../constants/ConvertJsonName';
 import { ItemsGroupStyle } from '../constants/AppStyles';
-//import { GetItemsGroupsAction, NewPartySelectionAction, PartyItemsAction } from '../Redux1/actions/ItemsGroupsActions';
-//import { getLocationAsync } from '../constants/LocationData';
+import { GetItemsGroupsAction, NewPartySelectionAction, PartyItemsAction } from '../Redux1/actions/ItemsGroupsActions';
+import { getLocationAsync, requestPermission } from '../constants/LocationData';
 import { DateTimeCustom } from '../constants/DateTime';
-//import { CreationDataAction, GetInvoiceNumberAction } from '../Redux1/actions/InvoicesActions';
+import { CreationDataAction, GetInvoiceNumberAction } from '../Redux1/actions/InvoicesActions';
 import String from '../translation/Translate'
- 
+import NetInfo, { NetInfoSubscription, NetInfoState } from '@react-native-community/netinfo';
+import HeaderCustom from '../constants/HeaderCustom';
+import { CheckConnectivity } from '../constants/constantsData';
+
 class ClientsPage extends React.PureComponent {
     _isMounted = false;
     constructor(props) {
@@ -37,61 +39,27 @@ class ClientsPage extends React.PureComponent {
             selected: null,
             state: 'Java',
             image: "",
-            dataSource: [],
+            dataSource:[],
             location: null,
             errorMessage: null,
             isLocationModalVisible: false,
-            appState: AppState.currentState
+            appState: AppState.currentState,
+            isConnected: true
+
         };
 
         //  console.log(props.Parties)
+    //    this.props.dispatch(ViewParties());
+        //console.log("constr", this.props.Parties);
+
     }
 
 
-    // CheckLocationPermission = async () => {
-    //     const permission = await Permissions.getAsync(Permissions.LOCATION);
-    //     if (permission.status !== 'granted') {
-    //         const newPermission = await Permissions.askAsync(Permissions.LOCATION);
-    //         if (newPermission.status === 'granted') {
-    //             //its granted.
-    //         }
-    //         if (status !== 'granted') {
-    //             alert('Hey! You heve not enabled selected permissions');
 
-    //         }
-    //     }
-    // };
-
-
-    // CheckCamPermission = async () => {
-
-    //     const permission = await Permissions.askAsync(Permissions.CAMERA_ROLL, Permissions.CAMERA);
-
-    //     if (permission.status !== 'granted') {
-    //         const newPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL, Permissions.CAMERA);
-    //         if (newPermission.status === 'granted') {
-    //             //its granted.
-    //         }
-    //         if (status !== 'granted') {
-    //             alert('Hey! You heve not enabled selected permissions');
-
-    //         }
-    //     }
-
-
-
-
-    // };
-
-
-
-    // componentWillUnmount() {
-    //     AppState.removeEventListener('change', this.handleAppStateChange)
-    // }
     handleAppStateChange = (nextAppState) => {
         if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
             console.log('App has come to the foreground!')
-          //  getLocationAsync()
+            //  getLocationAsync()
         }
         if (this._isMounted) {
             this.setState({ appState: nextAppState });
@@ -101,105 +69,109 @@ class ClientsPage extends React.PureComponent {
     componentWillUnmount() {
 
         this._isMounted = false;
-        console.log('WillUnmount', this._isMounted)
+        //   console.log('WillUnmount', this._isMounted)
+
+    }
+
+ 
+
+    componentDidMount = async () => {
+
+        this._isMounted = true;
+        requestPermission()
+
+        AppState.addEventListener('change', this.handleAppStateChange);
+
+        getLocationAsync().then(locations => {
+            //    console.log("Client", locations);
+
+            if (this._isMounted) {
+
+                this.setState({
+                    location: locations.latitude + ',' + locations.longitude
+                });
+            }
+
+        }).catch(e => {
+            console.log('Carch', e);
+
+        })
+
+
+        
+            if (this._isMounted) {
+           //     console.log("Client", this.props.Parties);
+
+                this.setState({
+                    dataSource: this.props.Parties,
+
+                })
+            }
+        
     }
 
 
 
-    componentDidMount = async () => {
-        this._isMounted = true;
-        console.log('Didnmount', this._isMounted)
+    _TakeImage = async (dataFromChild) => {
 
-    //  t= await GetOrders(this.props.Token, this.props.userHeaderInfo)
 
-        AppState.addEventListener('change', this.handleAppStateChange);
+        CheckConnectivity().then(connected => {
 
-        // location = await getLocationAsync()
-        // if (this._isMounted) {
+            if (connected.isConnected && connected.isInternetReachable) {
 
-        //     this.setState({
-        //         location: location
-        //     });
-        // }
-        this.props.dispatch(GetPartiesAction(this.props.Token, this.props.userHeaderInfo, this.props.navigation))
-            .then((responseJson) => {
-                if (this._isMounted) {
-                    this.setState({
-                        dataSource: this.props.Parties,
+                var editedState = [...this.props.Parties]
 
-                    })
-                }
 
-            }).catch((error) => {
-                console.error("Promise catch",error);
-            });
+                let filteredIndex = editedState.findIndex((obj => obj.PartyCode == dataFromChild));
 
-        if (this._isMounted) {
-            this.setState({
-                dataSource: this.props.Parties,
+                var selectedItem = editedState.filter(t => t.id == dataFromChild)
 
-            })
-        }
-        // this.CheckCamPermission()
-        // this.CheckLocationPermission();
-        // AppState.addEventListener('change', this.handleAppStateChange);
-        this.props.dispatch(GetItemsGroupsAction(this.props.Token, this.props.userHeaderInfo));
+                let editedStateIndex = editedState[filteredIndex]
+
+                //console.log('child', dataFromChild)
+
+                const options = {
+                    quality: 1.0,
+                    maxWidth: 500,
+                    maxHeight: 500,
+                    storageOptions: {
+                        skipBackup: true,
+                        path: 'images',
+                        base64: false,
+                    },
+                };
+                ImagePicker.launchCamera(options, (result) => {
+                    console.log('response', this.state.location);
+
+                    if (result.didCancel) {
+                        console.log('User cancelled image picker');
+                    } else if (result.error) {
+                        console.log('ImagePicker Error: ', result.error);
+                    } else if (result.customButton) {
+                        console.log('User tapped custom button: ', result.customButton);
+                        alert(result.customButton);
+                    } else {
+                        const source = { uri: result.uri };
+                        console.log('response', source);
+                        editedStateIndex.ImageUrl = result.uri
+                        editedStateIndex.ImageGPSInfo = this.state.location
+
+
+                        this.props.dispatch(UpdatePartyImageAction(editedState, this.props.userHeaderInfo.userId, this.props.userHeaderInfo.tenantId, this.props.Token, dataFromChild, this.state.location, result.uri))
+                        if (this._isMounted) {
+                            this.setState({ dataSource: editedState });
+                        }
+                    }
+                });
+
+            }
+            else {
+                alert(String.NoInternet)
+            }
+
+        })
+
     };
-
-
-
-
-    // resize = async uri => {
-    //     const manipResult = await ImageManipulator.manipulateAsync(
-    //         uri,
-    //         [{ resize: { width: 800 } }],
-    //         {
-    //             compress: 1,
-    //             format: ImageManipulator.SaveFormat.JPEG
-    //         }
-    //     );
-    //     return manipResult.uri;
-    // };
-
-
-    // _TakeImage = async (dataFromChild) => {
-    //     var editedState = [...this.props.Parties]
-
-
-    //     let filteredIndex = editedState.findIndex((obj => obj.PartyCode == dataFromChild));
-
-    //     var selectedItem = editedState.filter(t => t.id == dataFromChild)
-
-    //     let editedStateIndex = editedState[filteredIndex]
-
-
-
-    //     //console.log('child', dataFromChild)
-
-    //     await Permissions.askAsync(Permissions.CAMERA_ROLL);
-
-
-    //     let result = await ImagePicker.launchCameraAsync({
-    //         mediaTypes: ImagePicker.MediaTypeOptions.All,
-    //         aspect: [4, 3],
-    //         allowsEditing: false,
-    //     });
-
-    //     editedStateIndex.ImageUrl = result.uri
-    //     editedStateIndex.ImageGPSInfo = this.state.location
-    //     //  this.props.picture.thumbnail
-    //     //    console.log(result);
-
-    //     if (!result.cancelled) {
-
-
-
-    //         this.props.dispatch(UpdatePartyImageAction(editedState, this.props.userHeaderInfo.userId, this.props.userHeaderInfo.tenantId, this.props.Token, dataFromChild, this.state.location, result.uri))
-    //         if (this._isMounted) {
-    //             this.setState({ dataSource: editedState });
-    //         }
-    //     }
-    // };
 
 
 
@@ -208,24 +180,16 @@ class ClientsPage extends React.PureComponent {
         if (this.props.ItemsError == true) {
 
 
-            //      location = await getLocationAsync()
-
-            // console.log('PartyID', SectorId)
+            //enterted the same party 
             if (this.props.PartyID == partyId) {
 
+                //    console.log('PartyID=0')
                 this.props.dispatch(CreationDataAction(DateTimeCustom(), this.state.location, partyId))
-
-                // if (this.props.PartyID == 0) {
-                //   console.log('PartyID=0')
-
-                //     this.props.dispatch(PartyItemsAction(this.props.MainItems, partyId, SectorId))
-                // }
-
 
                 this.props.navigation.navigate('Items', { PartyName: PartyName, PartyID: partyId, SectorID: SectorId })
             }
             else {
-                if (this.props.PartyID !== 0) {
+                if (this.props.PartyID !== 0) {  //selected new party 
 
 
                     Alert.alert(
@@ -237,7 +201,7 @@ class ClientsPage extends React.PureComponent {
                                 text: String.Confirm, onPress: () => {
                                     this.props.dispatch(NewPartySelectionAction())
 
-                                    this.props.dispatch(CreationDataAction(DateTimeCustom(), location, partyId))
+                                    this.props.dispatch(CreationDataAction(DateTimeCustom(), this.state.location, partyId))
 
                                     //   PartyName = this.props.Parties.find(x => x.PartyCode == partyId).DisplayName
                                     this.props.dispatch(PartyItemsAction(this.props.MainItems, partyId, SectorId))
@@ -252,10 +216,11 @@ class ClientsPage extends React.PureComponent {
                         { cancelable: false }
                     )
                 }
-                else {
+                else { //first time selection or after invoice
                     this.props.dispatch(NewPartySelectionAction())
 
-                    this.props.dispatch(CreationDataAction(DateTimeCustom(), location, partyId))
+
+                    this.props.dispatch(CreationDataAction(DateTimeCustom(), this.state.location, partyId))
 
                     //   PartyName = this.props.Parties.find(x => x.PartyCode == partyId).DisplayName
                     this.props.dispatch(PartyItemsAction(this.props.MainItems, partyId, SectorId))
@@ -284,9 +249,10 @@ class ClientsPage extends React.PureComponent {
     }
 
 
-
     clear = () => {
-        this.search.clear();
+        if (this._isMounted) {
+        this.setState({ dataSource: this.props.Parties, search: '' })
+        }
     };
 
 
@@ -327,10 +293,6 @@ class ClientsPage extends React.PureComponent {
     }
 
 
-    fakefunction = () => {
-        console.log('Fake Function')
-        this.render()
-    }
 
     searchFilterFunction = text => {
         if (this._isMounted) {
@@ -360,16 +322,31 @@ class ClientsPage extends React.PureComponent {
 
     render() {
         const { search, } = this.state;
+        ///  console.log('Customers', this.props.Parties);
+
+
         return (
             <View style={[rtlView()], {}} >
-                <SearchBar lightTheme
+                <HeaderCustom
+                    isRight={false}
+                    leftNavigation={() => this.props.navigation.openDrawer()}
+                    leftname="md-menu"
+                    title={String.Parties}
+                    leftsize={33}
+                // onChangeText={this.searchFilterFunction}
+                // onClear={(text) => this.searchFilterFunction('')}
+                // search={search}
+                />
 
-                    inputStyle={{ textAlign: rtlView().textAlign }}
+                <SearchBar lightTheme
+                    inputContainerStyle={{ backgroundColor: 'white', }}// textAlign: rtlView().textAlign }}
                     onChangeText={(text) => this.searchFilterFunction(text)}
-                    onClear={(text) => this.searchFilterFunction('')}
+                    onClear={(text) => this.clear()}
+                    containerStyle={{ borderTopColor: '#b40000', backgroundColor: '#b40000', }}
                     placeholder={String.Search}
                     value={search}
                 />
+
                 <View style={styles.topContainer}>
                     {this.props.visible &&
                         <View style={[ItemsGroupStyle.container, ItemsGroupStyle.horizontal]}>
@@ -381,7 +358,7 @@ class ClientsPage extends React.PureComponent {
 
                         <FlatList
                             data={this.state.dataSource}
-
+                            maxToRenderPerBatch={10}
                             renderItem={this.renderItem}
 
                             keyExtractor={i => i.RowNum.toString()}
@@ -391,7 +368,8 @@ class ClientsPage extends React.PureComponent {
                             onEndThreshold={0}
                             ItemSeparatorComponent={this.renderSeparator}
 
-                        />}
+                        />
+                    }
                 </View>
             </View>
         );
@@ -410,14 +388,14 @@ const mapStateToProps = state => ({
     Tenent: state.login.tenant.id,
     Token: state.login.token,
 
-    PartyID: 100,//state.itemGroups.PartyID,
-    ItemsError:false,//state.itemGroups.Status,
-    StatusMessage:"",// state.itemGroups.StatusMessage,
+    PartyID: state.itemGroups.PartyID,
+    ItemsError: state.itemGroups.Status,
+    StatusMessage: state.itemGroups.StatusMessage,
     userHeaderInfo: state.login.userHeaderInfo,
     tenantProfile: state.login.tenantProfile,
 
 
-    MainItems:[]// state.itemGroups.mainItems,
+    MainItems: state.itemGroups.mainItems,
 
 
 })
@@ -435,7 +413,7 @@ const styles = StyleSheet.create({
     },
     topContainer: {
         paddingTop: 15,
-        paddingBottom: 115
+        paddingBottom: 250
     },
     imgView: {
         flex: 1,

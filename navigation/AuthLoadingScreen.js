@@ -38,21 +38,21 @@ class AuthLoadingScreen extends React.Component {
     if (userToken === null) {
       userToken = false;
     }
-    this.props.navigation.navigate('Menu');
-    // this.props.navigation.navigate(
-    //   userToken? "Menu" : "login"
-    // );
-    //  console.log('USerToken', userToken)
-    // if (userToken === true) {
-    //   //  this.props.navigation.navigate('Menu');
+   // this.props.navigation.navigate('Menu');
+    this.props.navigation.navigate(
+      userToken? "Menu" : "login"
+    );
+    // console.log('USerToken', userToken)
+    if (userToken === true) {
+      //  this.props.navigation.navigate('Menu');
 
-    //   this.props.navigation.navigate(
-    //     this.props.userType == "sales" ? "Menu" : "Delivery"
-    //   );
+      this.props.navigation.navigate(
+        this.props.userType == "sales" ? "Menu" : "Delivery"
+      );
 
-    // } else {
-    //   this.props.navigation.navigate('login');
-    // }
+    } else {
+      this.props.navigation.navigate('login');
+    }
 
   }
 

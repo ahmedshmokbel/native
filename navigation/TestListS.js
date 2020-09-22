@@ -22,9 +22,11 @@ import {
   DebugInstructions,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import RNSettings from 'react-native-settings';
 
 import RNLocation from 'react-native-location';
 import moment from 'moment';
+import { requestPermission, getLocationSettings, _startUpdatingLocation } from '../constants/LocationData';
 const repoUrl = "https://github.com/timfpark/react-native-location";
 
 export default class TestList extends React.Component {
@@ -59,62 +61,114 @@ export default class TestList extends React.Component {
       console.warn(err)
     }
   }
-  componentDidMount() {
-
-    RNLocation.configure({
-      distanceFilter: 0.5, // Meters
-      desiredAccuracy: {
-        ios: "best",
-        android: "balancedPowerAccuracy"
-      },
-      // Android only
-      androidProvider: "auto",
-      interval: 5000, // Milliseconds
-      fastestInterval: 10000, // Milliseconds
-      maxWaitTime: 5000, // Milliseconds
-      // iOS Only
-      activityType: "other",
-      allowsBackgroundLocationUpdates: false,
-      headingFilter: 1, // Degrees
-      headingOrientation: "portrait",
-      pausesLocationUpdatesAutomatically: false,
-      showsBackgroundLocationIndicator: false,
-    })
+async  componentDidMount() {
 
 
-    RNLocation.requestPermission({
-      ios: "whenInUse",
-      android: {
-        detail: "fine",
-        rationale: {
-          title: "Location permission",
-          message: "We use your location to demo the library",
-          buttonPositive: "OK",
-          buttonNegative: "Cancel"
-        }
-      }
-    }).then(granted => {
-      if (granted) {
-        this._startUpdatingLocation();
-      }
-    });
+    // this.requestLocationPermission()
+    // RNLocation.configure({
+    //   distanceFilter: 0.5, // Meters
+    //   desiredAccuracy: {
+    //     ios: "best",
+    //     android: "balancedPowerAccuracy"
+    //   },
+    //   // Android only
+    //   androidProvider: "auto",
+    //   interval: 5000, // Milliseconds
+    //   fastestInterval: 10000, // Milliseconds
+    //   maxWaitTime: 5000, // Milliseconds
+    //   // iOS Only
+    //   activityType: "other",
+    //   allowsBackgroundLocationUpdates: false,
+    //   headingFilter: 1, // Degrees
+    //   headingOrientation: "portrait",
+    //   pausesLocationUpdatesAutomatically: false,
+    //   showsBackgroundLocationIndicator: false,
+    // })
+
+
+    // RNLocation.requestPermission({
+    //   ios: "whenInUse",
+    //   android: {
+    //     detail: "fine",
+    //     rationale: {
+    //       title: "Location permission",
+    //       message: "We use your location to demo the library",
+    //       buttonPositive: "OK",
+    //       buttonNegative: "Cancel"
+    //     }
+    //   }
+    // }).then(granted => {
+    //   if (granted) {
+    //  //   this._startUpdatingLocation();
+    //   }
+    // });
+  //  _startUpdatingLocation()
+    console.log("LocarionDataaa",await getLocationSettings());
 
 
 
 
+  }
 
 
 
 
+  getLocationSetting() {
 
     RNSettings.getSetting(RNSettings.LOCATION_SETTING).then(result => {
       if (result === RNSettings.ENABLED) {
-        this.setState({ locationOn: true });
+        //    this.setState({ locationOn: true });
+        return
       } else {
-        this.setState({ locationOn: false });
+        //  this.setState({ locationOn: false });
+        this.openLocationSetting()
       }
     });
 
+  }
+
+
+  openLocationSetting = () => {
+    if (Platform.OS === 'ios') {
+      Alert.alert(
+        'Not supported!',
+        'Not supported on IOS just yet. Stay tuned ~_~',
+      );
+      return;
+    }
+    RNSettings.openSetting(RNSettings.ACTION_LOCATION_SOURCE_SETTINGS).then(
+      result => {
+        if (result === RNSettings.ENABLED) {
+          //   this.setState({ locationOn: true });
+        } else {
+          //  this.setState({ locationOn: false });
+          return
+        }
+      },
+    );
+  };
+
+
+  openAirplaneSetting = () => {
+    if (Platform.OS === 'ios') {
+      Alert.alert(
+        'Not supported!',
+        'Not supported on IOS just yet. Stay tuned ~_~',
+      );
+      return;
+    }
+    RNSettings.openSetting(RNSettings.ACTION_AIRPLANE_MODE_SETTINGS).then(
+      result => {
+        if (result === RNSettings.ENABLED) {
+          this.setState({ airplaneOn: true });
+        } else {
+          this.setState({ airplaneOn: false });
+        }
+      },
+    );
+  };
+
+  getAirPlaneSetting() {
     if (Platform.OS === 'android') {
       RNSettings.getSetting(RNSettings.AIRPLANE_MODE_SETTING).then(result => {
         if (result === RNSettings.ENABLED) {
@@ -125,13 +179,6 @@ export default class TestList extends React.Component {
       });
     }
 
-      RNSettings.getSetting(RNSettings.CAPTIONING_SETTINGS).then(result => {
-        if (result === RNSettings.ENABLED) {
-          this.setState({ captioningOn: true });
-        } else {
-          this.setState({ captioningOn: false });
-        }
-      });
   }
 
 
@@ -139,22 +186,32 @@ export default class TestList extends React.Component {
 
 
 
-
-  _startUpdatingLocation = () => {
+  _startUpdatingLocation = async () => {
     this.locationSubscription = RNLocation.subscribeToLocationUpdates(
       locations => {
-        console.log("Update",locations);
+        //    console.log("Update", locations);
 
         this.setState({ location: locations[0] });
       }
     );
 
 
-    RNLocation.configure({ distanceFilter: null });
-    RNLocation.getLatestLocation({ timeout: 60000 })
-      .then(latestLocation => {
-        console.log("Change",latestLocation);
-      })
+    console.log("Updatess", this.state.location);
+
+    RNLocation.configure({ distanceFilter: 500 });
+    var latestLocation = await RNLocation.getLatestLocation({ timeout: 60000 })
+    // .then(latestLocation => {
+    //   console.log("Change", latestLocation);
+    // })
+    console.log("ChangingRe", latestLocation);
+
+
+
+
+    this.getLocationSettings()
+
+
+
   }
 
   _stopUpdatingLocation = () => {

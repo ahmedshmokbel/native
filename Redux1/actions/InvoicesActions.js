@@ -1,4 +1,10 @@
-import { CREATION_DATA, ADD_INVOICE, VIEW_ALL_INVOICES, ADD_INVOICE_ITEMS, REMOVE_FROM_ITEMS_INVOICE, GET_INVOICE_NUMBER, SIGNOUT_REQUEST, SET_ORDERS_API } from "../types";
+import {
+    CREATION_DATA, ADD_INVOICE,
+    FINISHED_PENDDING_INOICES,
+    LOADING_PENDDING_INOICES,
+    VIEW_ALL_INVOICES, ADD_INVOICE_ITEMS,
+    REMOVE_FROM_ITEMS_INVOICE, GET_INVOICE_NUMBER, SIGNOUT_REQUEST, SET_ORDERS_API
+} from "../types";
 import { SendInvoice, GetInvoiceNumber } from "../PostAPI";
 import { Alert } from "react-native";
 import { getLocalizedJsonName } from "../../constants/ConvertJsonName";
@@ -102,29 +108,96 @@ export const RemoveFromInvoiceItems = (ItemId) => dispatch => {
 
 
 export const AddInvoice = (invoice, token, userHeaderInfo, navigate) => async dispatch => {
-    dispatch({ type: ADD_INVOICE, payload: invoice });
-    console.log("PrinEE", invoice);
+    // console.log("Add Invoice", invoice);
     const responseJson = await SendInvoice(invoice, token, userHeaderInfo);
 
     if (responseJson.unAuthorizedRequest == false) {
         if (responseJson.success == true) {
             obj = JSON.parse(responseJson.result)
-            //  console.log("Items List mapped")
+
+            var editedState = [...invoice]
+            var editedInvoice = editedState[0]
+            editedInvoice.InvoiceState = true
+
+            //     console.log("Success", editedState);
+
+            dispatch({ type: ADD_INVOICE, payload: editedState });
 
             alert(getLocalizedJsonName(obj.Status[0].StatusMessage))
             //    dispatch({ type: ADD_INVOICE, payload: invoice });
         } else {
+            // console.log("Faild");
+
+            dispatch({ type: ADD_INVOICE, payload: invoice });
+
             alert(responseJson.error.message)
 
         }
 
 
     } else {
+        alert("Login Failed", responseJson.error.message)
 
-    //    dispatch({ type: SIGNOUT_REQUEST });
-      //  navigate.navigate('login')
+        dispatch({ type: SIGNOUT_REQUEST });
+        navigate.navigate('login')
     }
+    //console.log("No coooo")
 }
+
+
+
+
+
+export const AddFailedInvoices = (invoices, token, userHeaderInfo, navigate) => async dispatch => {
+  //  console.log("PrinEE", invoices);
+    dispatch({ type: LOADING_PENDDING_INOICES });
+
+    invoices.forEach(invoice => {
+
+
+        // console.log("Pressed", invoice);
+        SendInvoice(invoice, token, userHeaderInfo).then(responseJson => {
+
+            if (responseJson.unAuthorizedRequest == false) {
+                if (responseJson.success == true) {
+                    obj = JSON.parse(responseJson.result)
+
+                    alert(getLocalizedJsonName(obj.Status[0].StatusMessage) + " " + invoice.SSONum)
+                    //    dispatch({ type: ADD_INVOICE, payload: invoice });
+
+                    invoice.InvoiceState = true
+
+
+                } else {
+           //         console.log("Faild");
+                    invoice.InvoiceState = false
+
+                    alert(invoice.SSONum + " " + responseJson.error.message)
+
+                }
+                dispatch({ type: FINISHED_PENDDING_INOICES });
+
+
+            } else {
+                alert("Login Failed", responseJson.error.message)
+
+                dispatch({ type: SIGNOUT_REQUEST });
+                navigate.navigate('login')
+            }
+        })
+
+
+
+    })
+
+
+
+}
+
+
+
+
+
 
 
 export const GetInvoices = () => dispatch => {

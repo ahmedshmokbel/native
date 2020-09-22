@@ -1,6 +1,8 @@
 import {
     GET_ALL_GROUPS_ITEMS, GET_ALL_ITEMS_GROUPS_ERROR, GET_ALL_ITEMS_GROUPS_SUCCESS, ADD_TO_CART, FAVORITE_ITEM, SIGNOUT_REQUEST
-    , INCREMENT_ITEM, DECREMENT_ITEM, REMOVE_FROM_CART, REMOVE_ITEM, ADD_TO_ORDER, FILTER_GROUP, VIEW_ALL_GROUPS, VIEW_ALL_ITEMS, FILTER_BY_GROUP, PARTY_ITEMS, ADD_INVOICE, OTHER_PARTY_SELECTION, ITEMS_NO_PRICES, ADD_TO_CART_PENDDING, SEARCH_ITEM_CODE, ADD_OTHER_DISCOUNT, ORDER_GET_ALL_ITEMS, OTHER_ORDER_SELECTION
+    , INCREMENT_ITEM, DECREMENT_ITEM, REMOVE_FROM_CART, REMOVE_ITEM, ADD_TO_ORDER, FILTER_GROUP, VIEW_ALL_GROUPS, VIEW_ALL_ITEMS,
+     FILTER_BY_GROUP, PARTY_ITEMS, ADD_INVOICE, OTHER_PARTY_SELECTION, ITEMS_NO_PRICES, ADD_TO_CART_PENDDING, SEARCH_ITEM_CODE,
+      ADD_OTHER_DISCOUNT, ORDER_GET_ALL_ITEMS, OTHER_ORDER_SELECTION
 
 } from "../types";
 import { GetItemsGroups } from "../API";
@@ -31,7 +33,7 @@ export const PartyItemsAction = (MainItems, partyId, SectorId) => dispatch => {
     NewPartyIt = MainItems.map((item, i) => {
         //  console.log('Null PRi',item.ItemPricing)
         if (item.ItemPricing.filter(x => x.sectorid == SectorID).length == 0) {
-            console.log('NOOOOO')
+          //  console.log('NO price')
 
             return {
                 ...item,
@@ -115,9 +117,9 @@ export const PartyItemsAction = (MainItems, partyId, SectorId) => dispatch => {
 // }
 
 
-export const AddToCartPendding = (item, index, location) => dispatch => {
+export const AddToCartPendding = (item, index, ) => dispatch => {
 
-    dispatch({ type: ADD_TO_CART_PENDDING, payload: item, index: index, Location: location });
+    dispatch({ type: ADD_TO_CART_PENDDING, payload: item, index: index, });
 
 }
 
@@ -407,7 +409,7 @@ export const GetItemsGroupsAction = (token, userHeaderInfo, ) => async dispatch 
 
 
     const response = await GetItemsGroups(token, userHeaderInfo);
-
+  ///  console.log("Test: ", response)
 
     if (response.unAuthorizedRequest == false) {
 
@@ -493,11 +495,14 @@ export const GetItemsGroupsAction = (token, userHeaderInfo, ) => async dispatch 
 
             }
         }
+        else{
+            alert(response.error.message)
+        }
     }
     else {
 
-        //   dispatch({ type: SIGNOUT_REQUEST });
-        // navigate.navigate('Auth')
+        dispatch({ type: SIGNOUT_REQUEST });
+        navigate.navigate('Auth')
     }
 }
 

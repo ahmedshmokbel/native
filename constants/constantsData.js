@@ -1,6 +1,7 @@
 import { SIGNOUT_REQUEST, CHANGE_LANGUAGE } from "../Redux1/types";
 import { Alert, I18nManager } from "react-native";
 // import { Updates } from "expo";
+import NetInfo from "@react-native-community/netinfo";
 
 export const RolePermission = (Permission, PermissionArray) => {
 
@@ -22,7 +23,7 @@ export const ChangeLanguage = (lang, rtl) => dispatch => {
     I18nManager.forceRTL(rtl);
     Translate.setLanguage(lang)
     I18nManager.allowRTL(rtl);
- //   Updates.reload()
+    //   Updates.reload()
 
 }
 
@@ -32,7 +33,7 @@ export const ArabicLang = () => dispatch => {
     I18nManager.forceRTL(true);
     Translate.setLanguage('ar')
     I18nManager.allowRTL(true);
-  //  Updates.reload()
+    //  Updates.reload()
 
 
 }
@@ -43,7 +44,7 @@ export const EnglishLang = () => dispatch => {
     I18nManager.allowRTL(false);
 
     Translate.setLanguage('en')
-  //  Updates.reload()
+    //  Updates.reload()
     //  this.props.navigation.navigate("Auth")
 
 }
@@ -112,3 +113,34 @@ export const fetch = (url, options, timeout = 7000) => {
         )
     ]);
 }
+
+
+
+
+
+
+
+
+
+
+export const CheckConnectivity = () => {
+    // For Android devices
+    return new Promise(function (resolve, reject) {
+
+        NetInfo.fetch().then(state => {
+
+            // if (state.isConnected == true) {
+          //   console.log("Connected???", state);
+            // }
+            // else {
+            //     console.log("OFF???", state.isConnected);
+            // }
+            resolve(state)
+
+        }).catch(e => {
+            alert('Please enable Internet')
+        })
+    });
+
+}
+

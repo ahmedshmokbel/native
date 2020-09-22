@@ -1,11 +1,11 @@
 import {
-    SIGNOUT_REQUEST, LOGIN, CHANGE_IMG, ADD_LOOK_UPS, GET_PARTIES_PENDING, GET_PARTIES_SUCCESS, GET_PARTIES_ERROR, SEARCH_PARTY, UPDATE_PARTY_IMAGE
+    SIGNOUT_REQUEST, GET_PARTIES_PENDING, GET_PARTIES_SUCCESS, VIEW_ALL_PARTIES, SEARCH_PARTY, UPDATE_PARTY_IMAGE
 } from "../types";
 import { GetParties } from "../API";
 import { UpdateParty, UpdatePartyImage } from "../PostAPI";
 import { Alert } from "react-native";
 import { getLocalizedJsonName } from "../../constants/ConvertJsonName";
-import { Toast } from "native-base";
+
 
 
 export const GetPartiesAction = (token, userHeaderInfo, navigate) => async dispatch => {
@@ -13,10 +13,10 @@ export const GetPartiesAction = (token, userHeaderInfo, navigate) => async dispa
 
     await GetParties(token, userHeaderInfo)
         .then((responseJson) => {
-            //     console.log(responseJson)
+            //console.log("PAAA",responseJson)
             if (responseJson.unAuthorizedRequest == false) {
                 if (responseJson.success == true) {
-                    respArr = JSON.parse(responseJson.result)
+                    var respArr = JSON.parse(responseJson.result)
 
                     dispatch({ type: GET_PARTIES_SUCCESS, Payload: respArr });
 
@@ -30,8 +30,8 @@ export const GetPartiesAction = (token, userHeaderInfo, navigate) => async dispa
             } else {
                 Alert.alert("Login Failed", responseJson.error.message)
 
-               // dispatch({ type: SIGNOUT_REQUEST });
-             //   navigate.navigate('login')
+                dispatch({ type: SIGNOUT_REQUEST });
+                navigate.navigate('login')
             }
         })
         .catch((error) => {
@@ -41,14 +41,7 @@ export const GetPartiesAction = (token, userHeaderInfo, navigate) => async dispa
 
 }
 
-
-
-
-export const SearchPartyAction = (filteredList) => async dispatch => {
-    //   dispatch({ type: GET_PARTIES_PENDING });
-    //console.log("IIII", BpSector.Id)
-    dispatch({ type: SEARCH_PARTY, FilteredList: filteredList });
-}
+ 
 
 export const UpdatePartyAction = (token, userHeaderInfo, phone, fax, email, code) => async dispatch => {
     //   dispatch({ type: GET_PARTIES_PENDING });
@@ -66,15 +59,15 @@ export const UpdatePartyAction = (token, userHeaderInfo, phone, fax, email, code
 
             //    dispatch({ type: GET_PARTIES_SUCCESS, Payload: respJson });
         } else {
-            Alert.alert(responseJson.error.message)
+            alert(responseJson.error.message)
 
         }
 
     } else {
-        Alert.alert("Login Failed", responseJson.error.message)
+        alert("Login Failed", responseJson.error.message)
 
-       // dispatch({ type: SIGNOUT_REQUEST });
-      //  navigate.navigate('login')
+        dispatch({ type: SIGNOUT_REQUEST });
+        navigate.navigate('login')
     }
 
 

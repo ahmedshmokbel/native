@@ -14,15 +14,20 @@ import { LoginPress, LookUpsAction, GetProfilePicAction } from '../Redux1/action
 import * as axios from "axios";
 
 import { ChangeLanguage } from '../Redux1/actions/SettingsActions';
+import ReactNativeRestart from 'react-native-restart';
+import SplashScreen from 'react-native-splash-screen'
 
 //import { Updates } from 'expo';
 import String from '../translation/Translate';
-import ZebraBTPrinter from "react-native-zebra-bt-printer";
 
 
 import { Overlay, Button } from 'react-native-elements';
 import RestingPassword from './RestingPassword';
 import { LoginURL } from '../Redux1/Url';
+import { requestPermission } from '../constants/LocationData';
+import { CheckConnectivity } from '../constants/constantsData';
+import { GetItemsGroupsAction } from '../Redux1/actions/ItemsGroupsActions';
+import { GetPartiesAction } from '../Redux1/actions/PartiesActions';
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
 const MARGIN = 40;
@@ -33,32 +38,7 @@ const to_sec = 0;
 
 
 class LoginScreen extends React.Component {
-
-
-
-  TestPrinter = () => {
-    ZebraBTPrinter.printLabel(
-      "0C:61:CF:45:F6:40",
-      1,
-      `^XA^CWJ,E:TT0003M_.TTF^FS^XZ
-      ^XA
-      ^FO75,50^CI28^AJ,50,0
-      ^F8^FD ايبكس سوليوشنز ^FS
-      ^PQ1,0,1
-      ^XZ`,
-      'ddd',
-      "sasa"
-    )
-      .then(result => {
-        console.log(result);
-
-        if (result === false) {
-          Alert.alert("Print failed, please check printer connection");
-        }
-      })
-      .catch(err => console.log(err.message));
-  }
-
+  _isMounted = false;
 
 
   constructor(props) {
@@ -97,6 +77,8 @@ class LoginScreen extends React.Component {
 
   }
 
+
+
   handleUnhandledTouches() {
     Keyboard.dismiss
     return false;
@@ -104,16 +86,23 @@ class LoginScreen extends React.Component {
 
 
 
-  ArabicLang = () => {
-    //   String.setLanguage('ar')
-    //   this.props.dispatch(ChangeLanguage("ar", true))
-    //   I18nManager.forceRTL(true);
+  componentWillUnmount() {
 
-    //   I18nManager.allowRTL(true);
-    //  // Updates.reload()
+    this._isMounted = false;
+
+  }
+
+
+
+  ArabicLang = () => {
+    String.setLanguage('ar')
+    this.props.dispatch(ChangeLanguage("ar", true))
+    I18nManager.forceRTL(true);
+
+    I18nManager.allowRTL(true);
+    ReactNativeRestart.Restart();
 
     //  this.props.navigation.navigate("Auth")
-    this.TestPrinter()
   }
 
   EnglishLang = () => {
@@ -122,6 +111,7 @@ class LoginScreen extends React.Component {
     I18nManager.forceRTL(false);
     I18nManager.allowRTL(false);
 
+    ReactNativeRestart.Restart();
 
     //   Updates.reload()
     //  this.props.navigation.navigate("Auth")
@@ -130,7 +120,7 @@ class LoginScreen extends React.Component {
 
 
 
-  login = () => {
+  login2 = () => {
     //    Amplitude.logEvent('Login')
 
     const httpClient = axios.create();
@@ -204,6 +194,113 @@ class LoginScreen extends React.Component {
 
 
 
+  componentDidMount = () => {
+
+    this._isMounted = true;
+  }
+
+
+
+  login = () => {
+    //    Amplitude.logEvent('Login')
+    CheckConnectivity().then(connected => {
+
+      if (connected.isConnected && connected.isInternetReachable) {
+
+        const httpClient = axios.create();
+        httpClient.defaults.timeout = 5000;
+        httpClient.post(
+          LoginURL + "TokenAuth/AuthenticateMobile",
+          {
+            "userNameOrEmailAddress": this.state.username,
+            "password": this.state.password,
+            "moduleCode": "MobileSalesApp",
+            "tenancyName": this.state.tenantname,
+          },
+          {
+            // responseType: "blob",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "text/plain"
+            }
+          },
+
+        )
+          .then(resp => {
+            //     console.log('ddd', resp);
+            return resp.data.result;
+          })
+          .then(responseJson => {
+            // console.log(resp.request.responseHeaders["Set-Cookie"]);
+            console.log("responseJson", responseJson);
+
+
+            if (responseJson.shouldResetPassword == false) {
+              //   console.log('UserID', this.props.UserId);
+              if (responseJson.success) {
+
+                this.props.dispatch(LoginPress(responseJson.accessToken, responseJson.tenant, responseJson.userHeaderInfo, true, responseJson.userName, responseJson.tenantProfile, responseJson.userPermissions))
+                this.props.dispatch(LookUpsAction(responseJson.accessToken, responseJson.userHeaderInfo))
+                this.props.dispatch(GetProfilePicAction(responseJson.accessToken))
+                this.props.dispatch(GetPartiesAction(responseJson.accessToken, responseJson.userHeaderInfo, this.props.navigation))
+
+
+                this.props.dispatch(GetItemsGroupsAction(responseJson.accessToken, responseJson.userHeaderInfo)).then(res => {
+
+                  Navigation.navigate('Auth')
+
+                  if (this._isMounted) {
+
+                    this.setState({ isLoading: false, });
+                  }
+                })
+
+
+
+              }
+              else {
+                alert("Login Failed", responseJson.errorMsg)
+                // Toast.show({
+                //   text: getLocalizedJsonName(obj.Status[0].StatusMessage),
+                //   buttonText: 'Okay'
+                // })
+                console.log("Server Response", error);
+
+              }
+            } else {
+
+              if (this._isMounted) {
+
+                this.setState({ isRest: true, PasswordResetCode: responseJson.passwordResetCode, userId: responseJson.userId, tenantId: responseJson.tenant.Id })
+              }
+            }
+
+
+
+
+          }).catch((error) => {
+            // handle error
+            console.log("Login Catch error", error);
+            alert("Login Failed !", error)
+
+          })
+          .finally(function () {
+            // always executed
+            //   console.log("error");
+
+          });
+
+
+
+      }
+      else {
+        alert(String.NoInternet)
+      }
+
+    })
+  }
+
+
 
   reseting = async () => {
 
@@ -226,33 +323,6 @@ class LoginScreen extends React.Component {
 
         })
       })
-
-      //  var obj = await ret.json();
-      // axios.post(
-      //   // "https://sago.mashreqgroup.com:5001/api/services/app/Account/ResetPassword",
-      //   "https://sago.mashreqgroup.com:5001/api/services/app/Account/ResetPassword",
-      //   {
-
-
-      //     "userId": this.state.userId,
-      //     "resetCode": this.state.PasswordResetCode,
-      //     "password": this.state.Repassword,
-
-
-
-
-      //   },
-      //   {
-      //     // responseType: "blob",
-      //     headers: {
-      //       "Content-Type": "application/json-patch+json",
-      //       "accept": "text/plain",
-      //       "Abp.TenantId":this.state.tenantId
-
-      //     }
-      //   },
-
-      // )
       .then(resp => {
         console.log('ddd', resp);
         return resp.data.result;
@@ -263,8 +333,10 @@ class LoginScreen extends React.Component {
 
         if (responseJson.success) {
 
-          this.setState({ isRest: false })
+          if (this._isMounted) {
 
+            this.setState({ isRest: false })
+          }
           // this.props.dispatch(LoginPress(responseJson.accessToken, responseJson.tenant, responseJson.userHeaderInfo, true, responseJson.userName, responseJson.tenantProfile, responseJson.userPermissions))
           // this.props.dispatch(LookUpsAction(responseJson.accessToken, responseJson.userHeaderInfo))
           // this.props.dispatch(GetProfilePicAction(responseJson.accessToken))
@@ -300,34 +372,41 @@ class LoginScreen extends React.Component {
 
 
 
-  GetValueFunction = () => {
-
-    if (this.state.username === 'ahmed' && this.state.password === 'a') {
 
 
-      this.props.dispatch(LoginPress(null, this.state.username))
-
-      Navigation.navigate('Menu')
-
-    } else {
-
-      Alert.alert('Error login', `you enterd data are wrong`)
-      // Alert.alert('Error login', `you enterd data are wrong : ${this.props.username}`)
+  test() {
 
 
+    if (this._isMounted) {
+      setTimeout(() => {
+        this.setState({ isLoading: false });
+        Navigation.navigate('Auth')
+
+      }, 11000);
     }
 
-
   }
+  _onGrow = () => {
 
 
+
+    Animated.timing(this.growAnimated, {
+      toValue: 1,
+      duration: 200,
+      easing: Easing.linear,
+    }).start();
+  }
   _onPress = () => {
 
     if (this.state.username != '' || this.state.password != '' || this.state.tenantname != '') {
       if (this.state.tenantname != '') {
         if (this.state.password != '') {
           if (this.state.isLoading) return;
-          this.setState({ EmpName: false, isLoading: true });
+
+          if (this._isMounted) {
+
+            this.setState({ EmpName: false, isLoading: true });
+          }
           Animated.timing(this.buttonAnimated, {
             toValue: 1,
             duration: 200,
@@ -336,27 +415,43 @@ class LoginScreen extends React.Component {
 
           setTimeout(() => {
             this._onGrow();
-          }, 2000);
+          }, 8000);
 
-          setTimeout(() => {
-            // Actions.secondScreen();
-            this.login();
-            this.setState({ isLoading: false, });
-            this.buttonAnimated.setValue(0);
-            this.growAnimated.setValue(0);
 
-          }, 2300);
+          this.login()
+
+          if (this.state.isLoading == false) {
+
+            setTimeout(() => {
+              // Actions.secondScreen();
+              //this.login();
+
+              this.buttonAnimated.setValue(0);
+              this.growAnimated.setValue(0);
+
+            }, 9000);
+          }
         }
         else {
-          this.setState({ EmpPass: true })
+
+          if (this._isMounted) {
+
+            this.setState({ EmpPass: true })
+          }
         }
       }
       else {
-        this.setState({ EmpTenant: true })
+        if (this._isMounted) {
+
+          this.setState({ EmpTenant: true })
+        }
       }
     } else {
 
-      this.setState({ EmpTenant: true, EmpPass: true, EmpName: true })
+      if (this._isMounted) {
+
+        this.setState({ EmpTenant: true, EmpPass: true, EmpName: true })
+      }
     }
   }
 
@@ -364,20 +459,23 @@ class LoginScreen extends React.Component {
 
   _passwordValidation = (text) => {
 
-    const { Repassword } = this.state;
-    this.setState({ EmpPass: false, confirmPassword: text, check: true })
+    if (this._isMounted) {
 
-    if (text != Repassword) {
-      this.setState({ MatchPass: false, iconName: 'close-circle-outline', color: 'red' })
-    } else {
-      if (text.length != 0) {
-        this.setState({ MatchPass: true, iconName: 'check-circle-outline', color: 'green', confirmPassword: text })
+      const { Repassword } = this.state;
+      this.setState({ EmpPass: false, confirmPassword: text, check: true })
 
+      if (text != Repassword) {
+        this.setState({ MatchPass: false, iconName: 'close-circle-outline', color: 'red' })
       } else {
-        this.setState({ check: false })
+        if (text.length != 0) {
+          this.setState({ MatchPass: true, iconName: 'check-circle-outline', color: 'green', confirmPassword: text })
+
+        } else {
+          this.setState({ check: false })
+
+        }
 
       }
-
     }
   }
 
@@ -390,30 +488,30 @@ class LoginScreen extends React.Component {
         if (this.state.isRestLoading) return;
         this.reseting()
 
+        if (this._isMounted) {
 
-        this.setState({ EmpResPass: false, isRestLoading: true });
 
+          this.setState({ EmpResPass: false, isRestLoading: true });
+        }
       }
       else {
-        this.setState({ EmpResPass: true })
-        // alert("ConPasswords don't match");
+        if (this._isMounted) {
 
+          this.setState({ EmpResPass: true })
+          // alert("ConPasswords don't match");
+
+        }
       }
     }
     else {
-      this.setState({ EmpResPass: true })
+      if (this._isMounted) {
+
+        this.setState({ EmpResPass: true })
+      }
     }
 
   }
 
-
-  _onGrow = () => {
-    Animated.timing(this.growAnimated, {
-      toValue: 1,
-      duration: 200,
-      easing: Easing.linear,
-    }).start();
-  }
 
   render() {
 
@@ -442,7 +540,13 @@ class LoginScreen extends React.Component {
             width='90%'
             height='50%'
             overlayStyle={{ justifyContent: 'center', alignItems: 'center', borderRadius: 20 }}
-            onBackdropPress={() => this.setState({ isRest: false })}>
+            onBackdropPress={() => {
+
+              if (this._isMounted) {
+
+                this.setState({ isRest: false })
+              }
+            }}   >
             <View style={{ justifyContent: 'center', alignItems: 'center', borderRadius: 20, }}>
               <Text style={{ marginBottom: 60, fontSize: 25, fontWeight: "bold" }}>{String.ResetPassword}</Text>
 
@@ -535,6 +639,8 @@ const mapStateToProps = state => ({
   orgUnitId: state.login.userHeaderInfo.orgUnitId,
   businessRefId: state.login.userHeaderInfo.businessRefId,
   // MainGroups: state.groups.Groups
+  Parties: state.parties.Parties,
+
 })
 
 export default connect(mapStateToProps)(LoginScreen)
